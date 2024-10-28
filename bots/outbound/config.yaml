@@ -1,0 +1,200 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template for book hotel bot.
+Resources:
+  MakeAppointmenBot:
+    Type: AWS::Lex::Bot
+    Properties:
+      AutoBuildBotLocales: False
+      DataPrivacy:
+        ChildDirected: false
+      Name: MakeAppointment
+      RoleArn: arn:aws:iam::135808942907:role/all_access
+      IdleSessionTTLInSeconds: 300
+      BotLocales:
+        - LocaleId: "en_US"
+          Description: "Book a trip bot Locale"
+          NluConfidenceThreshold: 0.40
+          VoiceSettings:
+            VoiceId: "Ivy"
+          Intents:
+            - Name: "AppointmentDate"
+              SampleUtterances:
+                - Utterance: "For a new patient what’s the next available appointment ?"
+              InitialResponseSetting:
+                NextStep:
+                  DialogAction:
+                    Type: "FulfillIntent"
+                InitialResponse:
+                  MessageGroupsList:
+                    - Message:
+                        PlainTextMessage:
+                          Value: "Let me check. "
+                  AllowInterrupt: "true"
+              FulfillmentCodeHook:
+                IsActive: "true"
+                PostFulfillmentStatusSpecification:
+                  FailureNextStep:
+                    DialogAction:
+                      Type: "ElicitIntent"
+                  SuccessResponse:
+                    MessageGroupsList:
+                      - Message:
+                          PlainTextMessage:
+                            Value: "Monday March 4th"
+                    AllowInterrupt: "true"
+                  SuccessNextStep:
+                    SessionAttributes:
+                      - Key: Nextappointment
+                        Value: "Monday March 4th"
+                    DialogAction:
+                      Type: "ElicitIntent"
+                  TimeoutNextStep:
+                    DialogAction:
+                      Type: "ElicitIntent"
+                Enabled: "false"
+            - Name: "FallbackIntent"
+              Description: "Default intent when no other intent matches"
+              ParentIntentSignature: "AMAZON.FallbackIntent"
+            - Name: "ConfirmDoctorExists"
+              SampleUtterances:
+                - Utterance: "Is there a docter {doctor_name}  that works here? "
+                - Utterance: "Is there a docter that works here? "
+                - Utterance: "Let's test it"
+              InitialResponseSetting:
+                Conditional:
+                  IsActive: "true"
+                  ConditionalBranches:
+                    - Name: "has_name"
+                      Response:
+                        MessageGroupsList:
+                          - Message:
+                              PlainTextMessage:
+                                Value: "default"
+                        AllowInterrupt: "true"
+                      Condition:
+                        ExpressionString: '{doctor_name} = ""'
+                      NextStep:
+                        DialogAction:
+                          Type: "ElicitSlot"
+                          SlotToElicit: "doctor_name"
+                  DefaultBranch:
+                    NextStep:
+                      DialogAction:
+                        Type: "FulfillIntent"
+                NextStep:
+                  DialogAction:
+                    Type: "EvaluateConditional"
+              FulfillmentCodeHook:
+                IsActive: "true"
+                PostFulfillmentStatusSpecification:
+                  FailureResponse:
+                    MessageGroupsList:
+                      - Message:
+                          PlainTextMessage:
+                            Value: "No, I'm sorry. That doctor is not working here. "
+                    AllowInterrupt: "true"
+                  FailureNextStep:
+                    DialogAction:
+                      Type: "ElicitIntent"
+                  SuccessResponse:
+                    MessageGroupsList:
+                      - Message:
+                          PlainTextMessage:
+                            Value: "yes, doctor {doctor_name} works here"
+                    AllowInterrupt: "true"
+                  SuccessNextStep:
+                    DialogAction:
+                      Type: "ElicitIntent"
+                  TimeoutNextStep:
+                    DialogAction:
+                      Type: "ElicitIntent"
+                Enabled: "false"
+              SlotPriorities:
+                - Priority: "0"
+                  SlotName: "doctor_name"
+              Slots:
+                - Name: doctor_name
+                  SlotTypeName: AMAZON.LastName
+                  ValueElicitationSetting:
+                    SlotCaptureSetting:
+                      CaptureNextStep:
+                        DialogAction:
+                          Type: FulfillIntent
+                      FailureNextStep:
+                        Intent:
+                          Name: FallbackIntent
+                        DialogAction:
+                          Type: StartIntent
+                      ElicitationCodeHook:
+                        EnableCodeHookInvocation: true
+                    SlotConstraint: Required
+                    PromptSpecification:
+                      MessageGroupsList:
+                        - Message:
+                            PlainTextMessage:
+                              Value: Could you please confirm the name of the doctor you're looking for
+                      MaxRetries: 4
+                      MessageSelectionStrategy: Random
+                      AllowInterrupt: true
+            - Name: NewPatients
+              Description: Are They Accepting New Patients?
+              SampleUtterances:
+                - Utterance: "Are They Accepting New Patients?"
+              InitialResponseSetting:
+                CodeHook:
+                  IsActive: True
+                  EnableCodeHookInvocation: True
+                  PostCodeHookSpecification:
+                    FailureNextStep:
+                      DialogAction:
+                        Type: EndConversation
+                    SuccessNextStep:
+                      DialogAction:
+                        Type: FulfillIntent
+                    TimeoutNextStep:
+                      DialogAction:
+                        Type: EndConversation
+                NextStep:
+                  DialogAction:
+                    Type: InvokeDialogCodeHook
+              FulfillmentCodeHook:
+                IsActive: True
+                PostFulfillmentStatusSpecification:
+                  FailureNextStep:
+                    DialogAction:
+                      Type: EndConversation
+                  SuccessResponse:
+                    MessageGroupsList:
+                      - Message:
+                          PlainTextMessage:
+                            Value: "Yes, They're Accepting New Patients"
+                    AllowInterrupt: True
+                  SuccessNextStep:
+                    DialogAction:
+                      Type: ElicitIntent
+                  TimeoutNextStep:
+                    DialogAction:
+                      Type: EndConversation
+                Enabled: False
+              SlotPriorities: []
+
+  MakeAppointmentInitialVersion:
+    DependsOn: MakeAppointmenBot
+    Type: AWS::Lex::BotVersion
+    Properties:
+      BotId: !Ref MakeAppointmenBot
+      BotVersionLocaleSpecification:
+        - LocaleId: en_US
+          BotVersionLocaleDetails:
+            SourceBotVersion: DRAFT
+      Description: Appointment Bot initial version
+
+  MakeAppointmentBotAliasN:
+    DependsOn: MakeAppointmentInitialVersion
+    Type: AWS::Lex::BotAlias
+    Properties:
+      BotId: !Ref MakeAppointmenBot
+      BotAliasName: "MakeAppointmenBotAlias"
+      BotVersion: !GetAtt MakeAppointmentInitialVersion.BotVersion
+      SentimentAnalysisSettings:
+        DetectSentiment: true
