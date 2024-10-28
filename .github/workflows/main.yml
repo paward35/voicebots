@@ -13,6 +13,6 @@ jobs:
         env:
           SUPER_SECRET: ${{ secrets.AWS_ACCESS_KEY_ID }}
         run: |
-          echo "$SUPER_SECRET"
+          echo $SUPER_SECRET
           
       
