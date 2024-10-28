@@ -13,5 +13,5 @@ jobs:
       - name: Check for AWS credentials
         run: |
           echo "AWS Access Key ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
-          echo "AWS Secret Access Key: ${secrets.AWS_SECRET_ACCESS_KEY:0:4}********"
+          aws sts get-caller-identity
       
