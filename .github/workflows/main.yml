@@ -8,10 +8,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check for AWS credentials
         run: |
-          echo "AWS Access Key ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "Testing"
           aws sts get-caller-identity
+          
       
