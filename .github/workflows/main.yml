@@ -9,10 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - shell: bash
+      - shell: cmd
         env:
           SUPER_SECRET: ${{ secrets.AWS_ACCESS_KEY_ID }}
         run: |
-          echo $SUPER_SECRET
-          
+          example-command "%SUPER_SECRET%"
       
