@@ -9,9 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check for AWS credentials
+      - shell: bash
+        env:
+          SUPER_SECRET: ${{ secrets.AWS_ACCESS_KEY_ID }}
         run: |
-          echo "Testing"
-          aws sts get-caller-identity
+          example-command "$AWS_ACCESS_KEY_ID"
           
       
