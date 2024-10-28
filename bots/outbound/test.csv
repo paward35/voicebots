@@ -1,0 +1,8 @@
+Line Number,Conversation Number,Source,Input,Session Attribute 1,Expected Output Intent,Expected Output Slot 1
+1,1,User,Is there a docter jackson that works here?,,ConfirmDoctorExists,
+3,1,Agent,"yes, doctor jackson works here",,,
+4,1,User,Are they accepting new patients ?,,NewPatients,
+5,1,Agent,"Yes, They're Accepting New Patients",,,
+6,1,User,For a new patent what’s the next available appointment ?,nextappointment = Monday March 4th,AppointmentDate,
+7,1,Agent,Let me check.,,,
+8,1,Agent,Monday March 4th,,,
