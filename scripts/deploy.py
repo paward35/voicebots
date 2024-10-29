@@ -1,7 +1,8 @@
 import boto3
 import os 
 from botocore.exceptions import ClientError
-import yaml 
+from cfn_tools import load_yaml
+import json
 
 # Explicitly specify credentials
 aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
@@ -20,7 +21,7 @@ cf_client = boto3.client(
 
 def load_template(file_path):
     with open(file_path, 'r') as file:
-        template_body = yaml.safe_load(file)
+        template_body = json.dumps(load_yaml(file.read()))
     return template_body
 
 

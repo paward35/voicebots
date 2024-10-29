@@ -19,4 +19,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: pip install boto3
+      - run: pip install cfn-flip
       - run: python deploy.py
