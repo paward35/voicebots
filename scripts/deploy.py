@@ -72,7 +72,7 @@ def create_stack(template_body):
         print(f"Failed to create stack '{stack_name}': {e}")
 
 
-template_body = load_template('../outbound/config.yaml')
+template_body = load_template('../bots/outbound/config.yaml')
 
 
 if check_stack_exists():
