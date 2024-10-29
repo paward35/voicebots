@@ -3,15 +3,20 @@ name: Deploy CloudFormation on Merge
 on:
   push:
     branches:
-      - main  # Change to the branch you want to monitor for merges
+      - main # Change to the branch you want to monitor for merges
+defaults:
+  run:
+    working-directory: scripts
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: "us-east-1"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - shell: cmd
-        env:
-          SUPER_SECRET: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        run: |
-          example-command "%SUPER_SECRET%"
-      
+      - uses: actions/checkout@v2
+      - run: pip install boto3
+      - run: python deploy.py
