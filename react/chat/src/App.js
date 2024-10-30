@@ -5,7 +5,7 @@ const BOT_IMAGE = 'https://media.istockphoto.com/id/1957053641/vector/cute-kawai
 const HUMAN_IMAGE = 'https://media.istockphoto.com/id/1268548918/vector/white-create-account-screen-icon-isolated-with-long-shadow-red-circle-button-vector.jpg?s=2048x2048&w=is&k=20&c=YSFQ6smXI8dUSY79Peo7ZIxqebn0qHMWLOsE6QIsjpI=';
 
 
-async function call_agent(message) {
+async function call_agent(messages) {
   const url = "https://paqbp62e85.execute-api.us-east-1.amazonaws.com/dev/";
 
   // Define the headers
@@ -14,14 +14,7 @@ async function call_agent(message) {
   };
 
   // Define the JSON payload
-  const payload = {
-    system: {
-      content: "helpful appointment scheduler receptionist, find out if the user would like to schedule an appointment and collect their phone number."
-    },
-    user: {
-      content: message
-    }
-  };
+  const payload = messages
   // Make the POST request to the API endpoint
   try {
     const response = await fetch(url, {
@@ -35,7 +28,7 @@ async function call_agent(message) {
     }
     // Parse the JSON response
     const data = await response.json();
-    return { content: data.body.content || "Something went wrong", role: "agent" };
+    return { content: data.body.content || "Something went wrong", role: "assistant" };
   } catch (error) {
     console.error("Error:", error);
     // Log more details to help identify the issue
@@ -44,7 +37,7 @@ async function call_agent(message) {
     } 
     console.error("Unexpected error:", error.message);
     
-    return { content: "I'm having trouble connecting right now. Please try again later.", role: "agent" };
+    return { content: "I'm having trouble connecting right now. Please try again later.", role: "assistant" };
   }
 }
 
@@ -65,7 +58,7 @@ function App() {
 function ChatRoom() {
   const chatContainerRef = useRef();
   const [messages, setMessages] = useState([
-    { id: 'initial', 'content': "Hello! I'd like to help set up your appointment. Could you please provide your phone number so we can chat?", role: "agent" },
+    { id: 'initial', 'content': "Hello! How can I help you today", role: "assistant" },
   ]);
   const [formValue, setFormValue] = useState('');
 
@@ -81,9 +74,8 @@ function ChatRoom() {
     const userMessage = { id: Date.now(), content: formValue, role: "user" };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setFormValue('');
-
     // Wait for the agent's response asynchronously
-    const agentMessage = await call_agent(formValue);
+    const agentMessage = await call_agent([...messages, userMessage]);
     setMessages((prevMessages) => [...prevMessages, { ...agentMessage, id: Date.now() + 1 }]);
   };
 
