@@ -13,14 +13,12 @@ async function call_agent(messages) {
     "Content-Type": "application/json"
   };
 
-  // Define the JSON payload
-  const payload = messages
   // Make the POST request to the API endpoint
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: headers,
-      body: JSON.stringify(payload)
+      body: JSON.stringify(messages)
     });
     // Check if the response is OK (status 200-299)
     if (!response.ok) {
@@ -28,7 +26,15 @@ async function call_agent(messages) {
     }
     // Parse the JSON response
     const data = await response.json();
-    return { content: data.body.content || "Something went wrong", role: "assistant" };
+    console.log(data)
+    if (data.body.content) {
+      return { content: data.body.content, role: "assistant" }
+    }
+    if (JSON.parse(data.body.function_call.arguments)) {
+      return { content: "Thank you! I shall call now.", role: "assistant" };
+    } else {
+      return { content: data.body.content || "Something went wrong", role: "assistant" };
+    }
   } catch (error) {
     console.error("Error:", error);
     // Log more details to help identify the issue
