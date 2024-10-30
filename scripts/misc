@@ -1,0 +1,8 @@
+###Create Lambda Package 
+mkdir python 
+cd python 
+arch -arm64 python -m pip install requests -t . --no-cache-dir --upgrade 
+cd ..
+zip -r openai-lambda-package.zip python
+aws s3 cp openai-lambda-package.zip s3://ml-data-02/
+aws lambda publish-layer-version --layer-name openai-layer --zip-file fileb://openai-lambda-package.zip --compatible-runtimes python3.11
