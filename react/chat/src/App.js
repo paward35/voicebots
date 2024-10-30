@@ -35,7 +35,7 @@ async function call_agent(message) {
     }
     // Parse the JSON response
     const data = await response.json();
-    return { text: data.body.content || "Something went wrong", role: "agent" };
+    return { content: data.body.content || "Something went wrong", role: "agent" };
   } catch (error) {
     console.error("Error:", error);
     // Log more details to help identify the issue
@@ -44,7 +44,7 @@ async function call_agent(message) {
     } 
     console.error("Unexpected error:", error.message);
     
-    return { text: "I'm having trouble connecting right now. Please try again later.", role: "agent" };
+    return { content: "I'm having trouble connecting right now. Please try again later.", role: "agent" };
   }
 }
 
@@ -65,7 +65,7 @@ function App() {
 function ChatRoom() {
   const chatContainerRef = useRef();
   const [messages, setMessages] = useState([
-    { id: 'initial', text: "Hello! I'd like to help set up your appointment. Could you please provide your phone number so we can chat?", role: "agent" },
+    { id: 'initial', 'content': "Hello! I'd like to help set up your appointment. Could you please provide your phone number so we can chat?", role: "agent" },
   ]);
   const [formValue, setFormValue] = useState('');
 
@@ -78,7 +78,7 @@ function ChatRoom() {
   const sendMessage = async (e) => {
     e.preventDefault();
 
-    const userMessage = { id: Date.now(), text: formValue, role: "user" };
+    const userMessage = { id: Date.now(), content: formValue, role: "user" };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setFormValue('');
 
@@ -102,14 +102,14 @@ function ChatRoom() {
 }
 
 function ChatMessage(props) {
-  const { text, role } = props.message;
+  const { content, role } = props.message;
   const messageClass = role === 'user' ? 'sent' : 'received';
   const image = role === 'user' ? HUMAN_IMAGE : BOT_IMAGE;
 
   return (
     <div className={`message ${messageClass}`}>
       <img src={image} alt="Avatar" />
-      <p>{text}</p>
+      <p>{content}</p>
     </div>
   );
 }
