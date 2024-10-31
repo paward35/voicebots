@@ -5,8 +5,29 @@ const BOT_IMAGE = 'https://media.istockphoto.com/id/1957053641/vector/cute-kawai
 const HUMAN_IMAGE = 'https://media.istockphoto.com/id/1268548918/vector/white-create-account-screen-icon-isolated-with-long-shadow-red-circle-button-vector.jpg?s=2048x2048&w=is&k=20&c=YSFQ6smXI8dUSY79Peo7ZIxqebn0qHMWLOsE6QIsjpI=';
 
 
+async function call_customer(number) {
+  const url = "https://paqbp62e85.execute-api.us-east-1.amazonaws.com/dev/VAPI/";
+  const headers = {
+    "Content-Type": "application/json"
+  };
+  console.log(number,number)
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({number})
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    console.error("Unexpected error:", error.message);
+    return { content: "I'm having trouble connecting right now. Please try again later.", role: "assistant" };
+  }
+}
+
+
+
 async function call_agent(messages) {
-  const url = "https://paqbp62e85.execute-api.us-east-1.amazonaws.com/dev/";
+  const url = "https://paqbp62e85.execute-api.us-east-1.amazonaws.com/dev/GPT/";
 
   // Define the headers
   const headers = {
@@ -30,7 +51,9 @@ async function call_agent(messages) {
     if (data.body.content) {
       return { content: data.body.content, role: "assistant" }
     }
-    if (JSON.parse(data.body.function_call.arguments)) {
+    let contact_info = JSON.parse(data.body.function_call.arguments)
+    if (contact_info) {
+      call_customer(contact_info.phoneNumber)
       return { content: "Thank you! I shall call now.", role: "assistant" };
     } else {
       return { content: data.body.content || "Something went wrong", role: "assistant" };
